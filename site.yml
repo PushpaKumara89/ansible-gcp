@@ -1,0 +1,33 @@
+---
+- name: Setup Nginx Web Server with Vars and Handlers
+  hosts: gcp_nodes
+  become: yes
+
+  vars:
+    app_title: "My Cloud App on GCP"
+    environment_type: "Production"
+
+  tasks:
+    - name: Install Nginx Web Server
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Ensure Nginx Service is Running
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Deploy Dynamic index.html Page
+      template:
+        src: index.html.j2
+        dest: /var/www/html/index.html
+      notify: Reload Nginx Service
+
+  handlers:
+    - name: Reload Nginx Service
+      service:
+        name: nginx
+        state: reloaded
